@@ -1,5 +1,11 @@
 # cron-mini
 
+![Python](https://img.shields.io/badge/python-3.8%2B-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
+![Tests](https://img.shields.io/badge/tests-17%20passing-success)
+![Dependencies](https://img.shields.io/badge/dependencies-0-brightgreen)
+![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey)
+
 零依赖的 cron 表达式解析与调度计算库 —— 下次执行时间、区间迭代、中文解释，5 字段标准语法。
 
 - **完整 5 字段语法**：`*`、列表、区间、步进（含区间步进 `a-b/n`）、月份与星期英文名（`jan` / `mon-fri`）
@@ -72,6 +78,18 @@ explain("*/10 * * * *")["summary"]   # '每 10 分钟执行一次'
 ```bash
 python -m unittest discover -s tests
 # Ran 17 tests ... OK
+```
+
+
+## 📁 项目结构
+
+```
+cron-mini/
+├── LICENSE
+├── cron_mini/
+├── pyproject.toml
+├── tests/
+└── README.md
 ```
 
 ## License
