@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cron-mini"
+version = "0.1.0"
+description = "零依赖 cron 表达式解析：下次执行时间、区间迭代、vixie 日/星期语义、中文解释"
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+keywords = ["cron", "scheduler", "定时任务", "next run"]
+
+[project.scripts]
+cron-mini = "cron_mini.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["cron_mini*"]
