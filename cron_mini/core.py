@@ -48,14 +48,15 @@ class CronExpr:
     months: frozenset[int]
     weekdays: frozenset[int]
     raw: str
+    restricted_fields: frozenset[str] = frozenset()
 
     @property
     def day_restricted(self) -> bool:
-        return self.days != frozenset(range(1, 32))
+        return "day" in self.restricted_fields or self.days != frozenset(range(1, 32))
 
     @property
     def weekday_restricted(self) -> bool:
-        return self.weekdays != frozenset(range(7))
+        return "weekday" in self.restricted_fields or self.weekdays != frozenset(range(7))
 
 
 def _parse_field(spec: str, field: str) -> frozenset[int]:
@@ -123,7 +124,12 @@ def parse(expr: str) -> CronExpr:
     months = _parse_field(fields[3], "month")
     weekdays = _parse_field(fields[4], "weekday")
     weekdays = frozenset(0 if w == 7 else w for w in weekdays)  # 7 也是周日
-    return CronExpr(minutes, hours, days, months, weekdays, raw=expr.strip())
+    restricted_fields = frozenset(
+        name for name, spec in (("day", fields[2]), ("weekday", fields[4]))
+        if spec != "*"
+    )
+    return CronExpr(minutes, hours, days, months, weekdays, raw=expr.strip(),
+                    restricted_fields=restricted_fields)
 
 
 def _day_ok(expr: CronExpr, t: datetime) -> bool:
@@ -148,7 +154,9 @@ def next_after(expr: CronExpr | str, after: datetime) -> datetime:
     if isinstance(expr, str):
         expr = parse(expr)
     t = after.replace(second=0, microsecond=0) + timedelta(minutes=1)
-    limit = t.replace(year=t.year + 5)  # 兜底：最多向前找 5 年
+    limit_year = t.year + 5
+    limit = t.replace(year=limit_year,
+                      day=min(t.day, calendar.monthrange(limit_year, t.month)[1]))
     while t < limit:
         if t.month not in expr.months:
             m = t.month + 1

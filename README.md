@@ -2,7 +2,7 @@
 
 ![Python](https://img.shields.io/badge/python-3.8%2B-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
-![Tests](https://img.shields.io/badge/tests-17%20passing-success)
+![Tests](https://img.shields.io/badge/tests-24%20passing-success)
 ![Dependencies](https://img.shields.io/badge/dependencies-0-brightgreen)
 ![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey)
 
@@ -10,7 +10,7 @@
 
 - **完整 5 字段语法**：`*`、列表、区间、步进（含区间步进 `a-b/n`）、月份与星期英文名（`jan` / `mon-fri`）
 - **@别名**：`@yearly` `@monthly` `@weekly` `@daily` `@midnight` `@hourly`
-- **vixie 语义**：「日」与「星期」同时显式受限时按 **OR** 匹配（与 Linux cron 一致），否则按 AND
+- **vixie 语义**：「日」与「星期」同时显式受限时按 **OR** 匹配（与 Linux cron 一致），否则按 AND；`1-31`、`0-6` 也属于显式受限
 - **星期兼容**：0 与 7 都表示周日
 - **跳跃式推进**：月不符跳月、日不符跳天，远快于逐分钟扫描；5 年兜底防死循环
 - **中文解释**：`explain()` 输出各字段中文描述与汇总语句
@@ -77,7 +77,11 @@ explain("*/10 * * * *")["summary"]   # '每 10 分钟执行一次'
 
 ```bash
 python -m unittest discover -s tests
-# Ran 17 tests ... OK
+# Ran 24 tests ... OK
+
+python -m pip install build twine
+python -m build
+python -m twine check dist/*
 ```
 
 
@@ -85,7 +89,10 @@ python -m unittest discover -s tests
 
 ```
 cron-mini/
+├── .github/workflows/
 ├── LICENSE
+├── MANIFEST.in
+├── CHANGELOG.md
 ├── cron_mini/
 ├── pyproject.toml
 ├── tests/

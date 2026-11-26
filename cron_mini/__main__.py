@@ -7,6 +7,7 @@
 from __future__ import annotations
 
 import argparse
+import calendar
 import sys
 from datetime import datetime
 
@@ -14,7 +15,15 @@ from . import __version__
 from .core import CronError, explain, iter_between, parse
 
 
+def _configure_standard_streams() -> None:
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if reconfigure is not None:
+            reconfigure(encoding="utf-8", errors="replace")
+
+
 def main(argv=None) -> int:
+    _configure_standard_streams()
     ap = argparse.ArgumentParser(prog="cron-mini", description="cron 表达式解析与下次执行时间")
     ap.add_argument("--version", action="version", version=f"cron-mini {__version__}")
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -35,7 +44,10 @@ def main(argv=None) -> int:
         if args.cmd == "next":
             base = datetime.fromisoformat(args.now) if args.now else datetime.now()
             expr = parse(args.expr)
-            for i, t in zip(range(args.count), iter_between(expr, base, base.replace(year=base.year + 5))):
+            end_year = base.year + 5
+            end = base.replace(year=end_year,
+                               day=min(base.day, calendar.monthrange(end_year, base.month)[1]))
+            for i, t in zip(range(args.count), iter_between(expr, base, end)):
                 print(f"{i + 1}: {t:%Y-%m-%d %H:%M:%S} ({t:%A})")
         elif args.cmd == "explain":
             info = explain(args.expr)

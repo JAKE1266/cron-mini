@@ -29,6 +29,13 @@ class TestParse(unittest.TestCase):
         self.assertEqual(parse("0 0 * * 7").weekdays, frozenset({0}))
         self.assertEqual(parse("0 0 * * sun").weekdays, frozenset({0}))
 
+    def test_explicit_full_ranges_are_restricted(self):
+        e = parse("0 0 1-31 * 0-6")
+        self.assertTrue(e.day_restricted)
+        self.assertTrue(e.weekday_restricted)
+        self.assertFalse(parse("* * * * *").day_restricted)
+        self.assertFalse(parse("* * * * *").weekday_restricted)
+
     def test_invalid(self):
         bad = ["", "* * * *", "* * * * * *", "60 * * * *", "* 24 * * *",
                "* * 0 * *", "* * * 13 *", "* * * * 8", "*/0 * * * *",
@@ -64,6 +71,10 @@ class TestNextAfter(unittest.TestCase):
         self.assertEqual(nxt("0 0 29 2 *", datetime(2026, 1, 1, 0, 0)),
                          datetime(2028, 2, 29, 0, 0))  # 2028 是闰年
 
+    def test_leap_day_start_does_not_raise(self):
+        self.assertEqual(nxt("* * * * *", datetime(2024, 2, 29, 10, 0)),
+                         datetime(2024, 2, 29, 10, 1))
+
     def test_late_night(self):
         self.assertEqual(nxt("59 23 * * *", datetime(2026, 3, 4, 23, 59)),
                          datetime(2026, 3, 5, 23, 59))
@@ -96,6 +107,16 @@ class TestVixieDayOrWeekday(unittest.TestCase):
         e2 = parse("0 12 * * 5")
         self.assertEqual(next_after(e2, datetime(2026, 3, 4, 0, 0)),
                          datetime(2026, 3, 6, 12, 0))
+
+    def test_explicit_full_weekday_range_uses_or(self):
+        e = parse("0 12 1 * 0-6")
+        self.assertEqual(next_after(e, datetime(2026, 3, 2, 0, 0)),
+                         datetime(2026, 3, 2, 12, 0))
+
+    def test_explicit_full_day_range_uses_or(self):
+        e = parse("0 12 1-31 * 0")
+        self.assertEqual(next_after(e, datetime(2026, 3, 2, 0, 0)),
+                         datetime(2026, 3, 2, 12, 0))
 
 
 class TestIterBetween(unittest.TestCase):
